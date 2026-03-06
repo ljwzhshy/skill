@@ -1,248 +1,227 @@
 ---
 name: java-code-style
 description: >
-  Best practices for writing Java backend code, including controllers, services, repositories,
-  naming conventions, exception handling, logging, mapper methods, and maintainable class/method structures.
-  Ensure consistent coding style, readable code, and adherence to common Java backend conventions during development.
-author: Imwe Team
-version: 1.0.0
-tags: [java, backend, code-style, quality]
+   Best practices for writing Java backend code, including controllers, services, repositories,
+   naming conventions, exception handling, logging, annotations, unit tests, SQL usage,
+   thread safety, performance, and secure coding practices.
+   Ensure consistent coding style, readable, maintainable, and robust backend code.
+author:  Team
+version: 1.1.0
+tags: [java, backend, code-style, quality, secure, performance]
 tools: [file_read, grep]
 ---
 
-# 代码规范检查
+# 核心规则
 
-### 核心规则/执行步骤
+## 1. 代码规模规范
+- 单个类不超过 500 行（推荐 300 行）
+- 单个方法不超过 80 行（推荐 50 行）
+- 嵌套层级不超过 3 层
+- 避免深层继承，推荐组合优先
 
-**检查以下规范类别（按 type 参数选择）：**
+## 2. 类名后缀约定
+- API 请求参数使用 `Param` 或 `Request` 后缀
+- API 响应结果使用 `Result` 或 `Response` 后缀
+- 数据库实体使用 `Model` 后缀
+- 内部 DTO/VO 使用 `Dto` 后缀
+- 工具类使用 `Util` 后缀
+- 异常类使用 `Exception` 后缀
 
-1. **代码规模规范**：
-   - 单个类不超过 500 行（推荐 300 行）
-   - 单个方法不超过 80 行（推荐 50 行）
-   - 嵌套层级不超过 3 层
+## 3. 命名规范
+- 类名：PascalCase
+- 方法名、变量名：camelCase
+- 常量名：UPPER_SNAKE_CASE
+- 接口名：`I` 开头或无前缀，保持语义清晰
+- 包名：小写，按功能分层
 
-2. **类名后缀约定**：
-   - API 请求参数使用 `Param` 或 `Request` 后缀
-   - API 响应结果使用 `Result` 或 `Response` 后缀
-   - 数据库实体使用 `Model` 后缀
-   - 内部数据流转使用 `Dto` 后缀
+## 4. 注解规范
+- 服务类：`@Service` 或 `@Component`
+- Controller：`@RestController` 或 `@Controller`
+- Mapper：`@Mapper`
+- 日志类：`@Slf4j`
+- 敏感字段加注解：如 `@Encrypt` 或自定义注解
+- 参数校验使用 `@NotNull`, `@Size` 等 JSR-303 注解
 
-3. **命名规范**：
-   - 类名：帕斯卡命名法（PascalCase），首字母大写
-   - 方法名：驼峰命名法（camelCase），首字母小写，动词开头
-   - 变量名：驼峰命名法（camelCase），首字母小写
-   - 常量名：全大写加下划线（UPPER_SNAKE_CASE）
+## 5. 异常处理规范
+- 异常统一向上抛出，由全局异常处理器统一处理
+- 保持异常链完整（使用 cause 参数）
+- 不捕获后返回错误码
+- 自定义异常分类（业务异常、系统异常、第三方异常）
+- 对外 API 不泄露敏感内部信息
 
-4. **异常处理规范**：
-   - 异常统一向上抛出，由框架统一处理
-   - 不捕获异常后返回错误码
-   - 保持异常链完整
+## 6. 日志规范
+- 使用 SLF4J 占位符：`log.info("UserId: {}", userId)`
+- 不要字符串拼接：`log.info("UserId: " + userId)`
+- 异常日志必须包含异常对象：`log.error("Failed", e)`
+- 关键业务流程必有日志记录
+- 敏感信息脱敏（手机号、身份证号、密码等）
 
-5. **Mapper 方法命名规范**：
-   - 查询方法使用 `find` / `query` / `load` 前缀
-   - 更新方法使用 `update` + `ByXxx` 格式
-   - 插入方法使用 `insert` 或 `save` 前缀
-   - 删除方法使用 `delete` 或 `remove` 前缀
+## 7. Mapper 方法命名规范
+- 查询：`findBy` / `queryBy` / `loadBy`
+- 更新：`updateById` / `updateXxxById`
+- 插入：`insert` / `batchInsert`
+- 删除：`deleteById` / `deleteByIds`
+- 使用明确参数名 `@Param("id")`
+
+## 8. 单元测试规范
+- 每个类必须有对应测试类
+- 测试方法命名：`methodName_shouldDoSomething_whenCondition`
+- 尽量覆盖正向、异常、边界、性能场景
+- 使用 Mock 避免依赖真实 DB/服务
+
+## 9. SQL/数据库规范
+- 避免 `select *`
+- 使用参数化查询，防止 SQL 注入
+- 复杂 SQL 建议写存储过程或视图
+- 对大表分页查询使用索引、limit/offset 或 keyset pagination
+- 批量插入/更新尽量使用批处理
+
+## 10. 线程安全 & 并发
+- 避免共享可变状态
+- 使用 `ConcurrentHashMap`、`AtomicXXX`、`ThreadLocal` 等安全类
+- 对于高并发修改，考虑加锁或事务控制
+- 避免死锁、无限循环、阻塞调用
+
+## 11. 性能优化
+- 避免频繁创建对象（特别是循环内）
+- 对大集合使用 Stream 或并行处理时注意性能
+- 尽量使用懒加载
+- 避免重复计算，可缓存常用结果
+
+## 12. 安全规范
+- 敏感信息加密存储
+- 输入参数校验严格（长度、类型、格式）
+- 防止 XSS、CSRF、SQL 注入等常见攻击
+- 不在日志打印敏感信息
+
+## 13. Controller 参数校验规范
+- 对前端请求参数使用 `@Valid` 或 `@Validated` 注解
+- DTO/Param 对象中使用 JSR-303 校验注解，如：
+   - `@NotNull`
+   - `@NotBlank`
+   - `@Size(min=, max=)`
+   - `@Pattern`
+- 对方法参数加 `@Valid`，结合 `@RequestBody` 或 `@RequestParam`
+- 校验失败由全局异常处理器统一返回标准错误
+## 14. Controller 请求/响应日志规范（AOP）
+
+### 核心规则
+- 使用 AOP 拦截 Controller 层请求
+- 打印请求参数（DTO）和响应结果
+- 对敏感信息进行脱敏（手机号、密码、身份证号等）
+- 使用 SLF4J 日志，避免字符串拼接
+- 配合 `@Valid` 实现参数校验
+
+### 示例 AOP 实现
+
+```java
+@Aspect
+@Component
+@Slf4j
+public class ControllerLoggingAspect {
+
+    @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
+    public void controllerPointcut() {}
+
+    @Around("controllerPointcut()")
+    public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        String methodName = joinPoint.getSignature().toShortString();
+        Object[] args = joinPoint.getArgs();
+
+        // 打印请求参数（脱敏处理）
+        log.info("Request to {} with args: {}", methodName, maskSensitive(args));
+
+        Object result;
+        try {
+            result = joinPoint.proceed();
+        } catch (Throwable t) {
+            log.error("Exception in {}: {}", methodName, t.getMessage(), t);
+            throw t;
+        }
+
+        // 打印响应结果（脱敏处理）
+        log.info("Response from {}: {}", methodName, maskSensitive(result));
+        return result;
+    }
+
+    private Object maskSensitive(Object obj) {
+        // 简单示例：可递归检查 DTO，脱敏手机号/密码
+        return obj; // 实际可调用通用脱敏工具
+    }
+}
 
 ### 示例
 
-**命令使用：**
-```bash
-/code-style --file=src/main/java/com/imwe/message/controller/CaptchaController.java
-/code-style --type=naming      # 只检查命名
-/code-style --type=structure   # 只检查结构
-```
-
-**类名后缀示例（正确）：**
 ```java
-// ✅ 正确：API 层参数
-public class CaptchaSendParam {
-    private String account;
-    private String captchaType;
+@RestController
+@RequestMapping("/user")
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    // ✅ 使用 @Valid 对请求参数进行校验
+    @PostMapping("/register")
+    public RegisterResult registerUser(@RequestBody @Valid UserRegisterParam request) {
+        return userService.registerUser(request);
+    }
 }
 
-// ✅ 正确：API 层响应
-public class SendCaptchaResult {
+// ✅ DTO/Param 示例
+public class UserRegisterParam {
+
+    @NotBlank(message = "用户名不能为空")
+    private String username;
+
+    @NotBlank(message = "密码不能为空")
+    @Size(min = 6, max = 20, message = "密码长度必须在6~20位")
+    private String password;
+
+    @Email(message = "邮箱格式不正确")
+    private String email;
+
+    // getter/setter
+}
+
+---
+
+# 示例代码
+
+```java
+// ✅ Controller 不写业务逻辑
+public class UserRegisterParam {
+    private String username;
+    private String password;
+}
+public class RegisterResult {
     private boolean success;
-    private String messageId;
+    private String userId;
 }
 
-// ✅ 正确：数据库实体
-@Data
-@Builder
-public class MsgSendLogModel implements Serializable {
-    private String id;
-    private String businessId;
-}
-
-// ✅ 正确：内部数据流转
-public class MessageContextDto {
-    private String businessKey;
-    private Map<String, String> params;
-}
-```
-
-**类名后缀示例（错误）：**
-```java
-// ❌ 错误：API 层不应该用 Dto
-public class CaptchaSendRequestDTO {
-}
-
-// ❌ 错误：数据库实体应该用 Model
-public class MsgSendLogEntity {
-}
-
-// ❌ 错误：不应该混用后缀
-public class MsgSendLogDO {
-}
-```
-
-**异常处理示例（正确）：**
-```java
-// ✅ 正确：异常向上抛出
-public void sendCaptcha(CaptchaSendRequest request) {
-    if (StringUtils.isBlank(request.getAccount())) {
-        throw new BusinessException(MessageErrorCode.INVALID_PARAM, "账号不能为空");
+// ✅ Service 层处理业务逻辑
+public void registerUser(RegisterRequest request) {
+    if (StringUtils.isBlank(request.getUsername())) {
+        throw new BusinessException("USERNAME_EMPTY");
     }
-    if (isBlacklisted(request.getAccount())) {
-        throw new RiskControlException(MessageErrorCode.ACCOUNT_BLACKLISTED);
-    }
-    return doSend(request);
+    return doRegister(request);
 }
-```
 
-**异常处理示例（错误）：**
-```java
-// ❌ 错误：捕获异常后返回错误码
-public Result sendCaptcha(CaptchaSendRequest request) {
-    try {
-        // 业务逻辑
-        return Result.success();
-    } catch (BusinessException e) {
-        // 不应该在这里处理，应该向上抛出
-        return Result.fail(e.getErrorCode(), e.getMessage());
-    }
-}
-```
+// ✅ Mapper 查询
+UserModel findById(@Param("id") String id);
+List<UserModel> queryByStatus(@Param("status") String status);
 
-**Mapper 方法命名示例：**
-```java
-// ✅ 正确：查询方法
-MsgSendLogModel findById(@Param("id") String id);
-List<MsgSendLogModel> queryByStatus(@Param("status") String status);
-
-// ✅ 正确：更新方法
-int updateById(@Param("model") MsgSendLogModel model);
+// ✅ Mapper 插入/更新/删除
+int insert(@Param("model") UserModel model);
 int updateStatusById(@Param("id") String id, @Param("status") String status);
-
-// ✅ 正确：插入方法
-int insert(@Param("model") MsgSendLogModel model);
-int batchInsert(@Param("list") List<MsgSendLogModel> list);
-
-// ✅ 正确：删除方法
 int deleteById(@Param("id") String id);
-int deleteByIds(@Param("ids") List<String> ids);
 
-// ❌ 错误：使用了其他前缀
-MsgSendLogModel getById(@Param("id") String id);           // 应该用 findById
-int modifyById(@Param("model") MsgSendLogModel model);      // 应该用 updateById
-int add(@Param("model") MsgSendLogModel model);              // 应该用 insert
-```
-
-### 参数说明
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `file` | String | 否 | 要检查的文件路径（可选，默认检查当前修改的文件） |
-| `type` | String | 否 | 检查类型（all, naming, structure, annotation, log, format，默认: all） |
-
-### 检查类型说明
-
-| 类型 | 说明 |
-|------|------|
-| `all` | 检查所有规范 |
-| `naming` | 只检查命名规范（类名、方法名、变量名、常量名） |
-| `structure` | 只检查类结构和后缀规范 |
-| `annotation` | 只检查注解规范 |
-| `log` | 只检查日志规范 |
-| `format` | 只检查代码格式 |
-
-### 代码审查清单
-
-**结构性检查：**
-- [ ] 类结构符合规范（常量 → 变量 → 构造器 → 方法）
-- [ ] 导入语句已整理并去重
-- [ ] 无未使用的导入
-- [ ] 无调试代码（System.out.println, TODO 等）
-- [ ] 无注释掉的代码块
-- [ ] 单个类不超过 500 行
-- [ ] 单个方法不超过 80 行
-
-**命名检查：**
-- [ ] 类名使用 PascalCase
-- [ ] 方法名和变量名使用 camelCase
-- [ ] 常量名使用 UPPER_SNAKE_CASE
-- [ ] 命名具有描述性，不使用缩写（除通用缩写）
-- [ ] API 请求参数使用 `Param` 或 `Request` 后缀
-- [ ] API 响应结果使用 `Result` 或 `Response` 后缀
-- [ ] 数据库实体使用 `Model` 后缀
-- [ ] 内部数据流转使用 `Dto` 后缀
-- [ ] 没有混用 `Entity`、`DO`、`VO` 等后缀
-
-**注解检查：**
-- [ ] 必要的注解已添加（@Service, @Component 等）
-- [ ] @Slf4j 已添加（如需日志）
-- [ ] @EnableEncrypt 已添加（敏感字段）
-
-**日志检查：**
-- [ ] 敏感信息已脱敏（手机号、身份证等）
-- [ ] 使用正确的日志级别
-- [ ] 异常日志包含异常对象
-- [ ] 关键业务流程有日志记录
-
-**异常处理检查：**
-- [ ] 异常被正确抛出（不捕获后返回错误码）
-- [ ] 异常信息包含足够的上下文
-- [ ] 资源正确释放（锁、连接等）
-
-### Mapper 命名规则总结
-
-| 操作类型 | 前缀 | 示例 | 说明 |
-|----------|------|------|------|
-| 单条查询 | `findBy` | `findById`, `findByBusinessId` | 按 X 查找 |
-| 批量查询 | `queryBy` | `queryByStatus`, `queryByPage` | 按 X 条件查询 |
-| 列表查询 | `findListBy` | `findListByStatus` | 查找列表 |
-| 单条加载 | `loadBy` | `loadByUniqueId` | 按 X 加载 |
-| 单条更新 | `updateById` | `updateById` | 更新整条记录 |
-| 字段更新 | `updateXxxById` | `updateStatusById` | 更新指定字段 |
-| 批量更新 | `updateXxxByIds` | `updateStatusByIds` | 批量更新字段 |
-| 单条插入 | `insert` | `insert`, `insertSelective` | 插入记录 |
-| 批量插入 | `batchInsert` | `batchInsert`, `insertBatch` | 批量插入 |
-| 单条删除 | `deleteById` | `deleteById`, `removeById` | 删除记录 |
-| 逻辑删除 | `deleteLogicallyById` | `deleteLogicallyById` | 逻辑删除 |
-| 批量删除 | `deleteByIds` | `deleteByIds`, `removeByIds` | 批量删除 |
-| 统计数量 | `countBy` | `count`, `countByStatus` | 统计数量 |
-| 存在检查 | `existsBy` | `existsById`, `checkExistsBy` | 检查存在 |
-
-### 注意事项
-
-1. **注释语言**：
-   - 类注释：中文
-   - 方法注释：中文
-   - 行内注释：中文
-   - 代码变量：英文
-
-2. **日志记录**：
-   - 使用 SLF4J 占位符：`log.info("Value: {}", value)`
-   - 不要字符串拼接：`log.info("Value: " + value)`
-   - 敏感信息脱敏：`DesensitizeUtil.maskPhone(phone)`
-
-3. **异常处理**：
-   - 异常统一向上抛出，由框架全局异常处理器统一处理
-   - 保持异常链完整，使用 cause 参数传递原始异常
-   - 资源清理使用 try-finally 或 try-with-resources
-
-### 相关文档
-
-- [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
-- [Alibaba Java Coding Guidelines](https://github.com/alibaba/p3c)
+// ✅ 异常处理
+try {
+    registerUser(request);
+} catch (BusinessException e) {
+    log.error("User registration failed: {}", request.getUsername(), e);
+    throw e;
+}
