@@ -40,7 +40,10 @@ tools: [file_read, grep]
    - 更新方法使用 `update` + `ByXxx` 格式
    - 插入方法使用 `insert` 或 `save` 前缀
    - 删除方法使用 `delete` 或 `remove` 前缀
-
+6. **url规范**：
+   - url 用api或rpc应用名称+模块+功能，如：`/api/imwe-message-center-service/captcha/send`
+   - 如果是给服务间调用就使用/rpc/** 如果是给外部调用的就使用/api/**
+   - 无法判断用途默认使用 /rpc/**，rpc接口（controller）还需要有对应的xxxFacade类作为feignClient，例如 `CaptchaFacade`
 ### 示例
 
 **命令使用：**
@@ -233,6 +236,8 @@ int add(@Param("model") MsgSendLogModel model);              // 应该用 insert
    - 使用 SLF4J 占位符：`log.info("Value: {}", value)`
    - 不要字符串拼接：`log.info("Value: " + value)`
    - 敏感信息脱敏：`DesensitizeUtil.maskPhone(phone)`
+   - 异常信息包含上下文：`log.error("Error occurred", e)`
+   - 使用英文描述：`log.error("Invalid parameter: {}", e.getMessage())`
 
 3. **异常处理**：
    - 异常统一向上抛出，由框架全局异常处理器统一处理
